@@ -3,6 +3,7 @@ package JavaBaseExercise;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -67,6 +68,8 @@ class MyCache{
 public class ReadWriteLockDemo {
     public static void main(String[] args) {
         MyCache myCache = new MyCache();
+
+        Map map = new ConcurrentHashMap();
 
         for (int i = 0; i < 5; i++) {
             final  int tempInt = i;
