@@ -9,7 +9,8 @@ public class Test {
 
         List<Integer> res = new ArrayList<>();
         // 注意 hasNext 和 hasNextLine 的区别
-        while (in.hasNextInt()) { // 注意 while 处理多个 case
+        while (in.hasNextInt()) {
+            // 注意 while 处理多个 case
             int beverages = in.nextInt();
             if (beverages == 0) {
                 break;
