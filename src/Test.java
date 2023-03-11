@@ -1,34 +1,56 @@
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Test {
 
     public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
+        Integer v1 = new Integer(2);
+        Integer v2 = new Integer(2);
+        System.out.println(v1.equals(v2));
 
-        List<Integer> res = new ArrayList<>();
-        // 注意 hasNext 和 hasNextLine 的区别
-        while (in.hasNextInt()) {
-            // 注意 while 处理多个 case
-            int beverages = in.nextInt();
-            if (beverages == 0) {
-                break;
-            }
+    }
 
-            int bottles = 0;
-            while (beverages / 3 != 0) {
-                bottles += beverages / 3;
-                beverages = beverages%3 + beverages/3;
-                if(beverages / 3 == 0) {
-                    if(beverages % 3 == 2) {
-                        bottles +=1;
-                    }
-                    res.add(bottles);
-                }
+    public int closestSum(int[] nums, int target) {
+        Arrays.sort(nums);
+
+        int start=0, end = nums.length-1;
+        int distance = Integer.MAX_VALUE;
+        for (int i = 1; i < nums.length -1; i++) {
+            while (start < i && end > i){
+                int sum = nums[start] + nums[i] + nums[end];
+                int diff = target - sum;
+
+                distance = Math.min(Math.abs(diff), distance);
+                if(diff == 0) return 0;
+                else if(diff > 0) start ++;
+                else if(diff < 0) end --;
             }
         }
-        res.stream().forEach(v-> System.out.println(v));
+        return distance;
     }
+
+//    public static boolean isPalindrome(String s) {
+//        s = s.toLowerCase();
+//        Deque<Character> queue = new LinkedList<>();
+//        int size = s.length();
+//
+//        for (int i = 0; i < size; i++) {
+//            char c = s.charAt(i);
+//            if ((c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')) {
+//                queue.offer(s.charAt(i));
+//            }
+//        }
+//        if(queue.isEmpty()) return true;
+//
+//        while (!queue.isEmpty() && queue.size() > 1) {
+//            if(!queue.peekFirst().equals(queue.peekLast())) {
+//                return false;
+//            }
+//            queue.pollLast();
+//            queue.pollFirst();
+//        }
+//
+//        if(queue.size() <= 1) return true;
+//        return  false;
+//    }
 
 }
