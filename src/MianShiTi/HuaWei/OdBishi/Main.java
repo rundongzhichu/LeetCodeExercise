@@ -5,40 +5,85 @@ import java.util.*;
 public class Main {
 
     public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-        int M = Integer.valueOf(in.next());
-        int N = Integer.valueOf(in.next());
 
-        Map<Integer, Integer> mMaps = new HashMap<>();
-        Map<Integer, Integer> nMaps = new HashMap<>();
-        int[] marr = new int[M];
-        int[] narr = new int[N];
-        for (int i = 0; i < M; i++) {
-            int m = Integer.valueOf(in.next());
-            mMaps.put(m, mMaps.getOrDefault(m,0)+1);
-        }
 
-        for (int i = 0; i < N; i++) {
-            int n = Integer.valueOf(in.next());
-            nMaps.put(n, nMaps.getOrDefault(n, 0)+1);
-        }
+    }
 
-        int count = 0;
+    public List<List<Integer>> subArraySumEqualZero(int[] nums){
+        Arrays.sort(nums);
+        int start = 0, end = nums.length-1;
 
-        for (int mKey:mMaps.keySet()){
-            for (int nKey :
-                    nMaps.keySet()) {
-                if(mKey == nKey) count += mMaps.get(mKey)*nMaps.get(nKey);
+        List<List<Integer>> res = new ArrayList<>();
+        for (int i = 1; i < nums.length -1; i++) {
+            start = 0;
+            end = nums.length-1;
+            while (start < i && end > i) {
+                int sum = nums[start] + nums[i] + nums[end];
+                if(sum == 0) {
+                    res.add(Arrays.asList(nums[start], nums[i], nums[end]));
+                    break;
+                }
+                if(sum<0){
+                    while (start < i && nums[start] == nums[start+1]) start++;
+                    start++;
+                } else {
+                    while (end > i && nums[end] == nums[end-1]) end--;
+                    end--;
+                }
+            }
+
+            while (i+1<nums.length -1 && nums[i+1] == nums[i]){
+                i++;
             }
         }
-
-        System.out.println(count);
+        return res;
     }
 
 }
 
+
+
+
+
 /**
  *
+ *
+
+ public class Main {
+
+ public static void main(String[] args) {
+ Scanner in = new Scanner(System.in);
+ int M = Integer.valueOf(in.next());
+ int N = Integer.valueOf(in.next());
+
+ Map<Integer, Integer> mMaps = new HashMap<>();
+ Map<Integer, Integer> nMaps = new HashMap<>();
+ int[] marr = new int[M];
+ int[] narr = new int[N];
+ for (int i = 0; i < M; i++) {
+ int m = Integer.valueOf(in.next());
+ mMaps.put(m, mMaps.getOrDefault(m,0)+1);
+ }
+
+ for (int i = 0; i < N; i++) {
+ int n = Integer.valueOf(in.next());
+ nMaps.put(n, nMaps.getOrDefault(n, 0)+1);
+ }
+
+ int count = 0;
+
+ for (int mKey:mMaps.keySet()){
+ for (int nKey :
+ nMaps.keySet()) {
+ if(mKey == nKey) count += mMaps.get(mKey)*nMaps.get(nKey);
+ }
+ }
+
+ System.out.println(count);
+ }
+
+ }
+
 
 public class Main {
 
