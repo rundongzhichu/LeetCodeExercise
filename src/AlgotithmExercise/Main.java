@@ -19,5 +19,8 @@ public class Main {
 
     }
 
+    public boolean isValidBST(TreeNode root) {
+
+    }
 
 }

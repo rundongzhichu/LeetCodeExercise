@@ -41,6 +41,10 @@ public class ScheduleCourse {
 /**
  * https://leetcode.cn/problems/course-schedule-iii/solutions/1155605/ke-cheng-biao-iii-by-leetcode-solution-yoyz/
  * todo 优先队列+贪心算法
+ * 记录一个优先队列，优先队列记录的是i-1门可能里面所有满足条件的k门课程的课程时间t
+ * 这个优先队列从大到小排序，
+ * 是为了当课程i不满足条件时，去替换掉之前满足条件的所有ti里面的最大值
+ * 这个最大值要比ti大，才能去替换，不然，达不到最优替换
  *
  */
 class Solution1 {
