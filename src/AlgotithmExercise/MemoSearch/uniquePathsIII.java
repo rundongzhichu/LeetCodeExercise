@@ -1,7 +1,5 @@
 package AlgotithmExercise.MemoSearch;
 
-import AlgotithmExercise.Main;
-
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
