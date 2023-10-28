@@ -1,22 +1,29 @@
-package AlgotithmExercise;
+package AlgotithmExercise.Thread;
 
-import java.awt.*;
+import AlgotithmExercise.Main;
+
 import java.util.concurrent.Semaphore;
 
-public class Main {
+
+/**
+ *
+ * 解决三个线程按顺序打印ABC
+ *
+ */
+public class ThreeThreadPrintABC {
 
     private Semaphore aSem = new Semaphore(1);
     private Semaphore bSem = new Semaphore(0);
     private Semaphore cSem = new Semaphore(0);
 
     public static void main(String[] args) {
-        new Main().test();
+        new ThreeThreadPrintABC().test();
     }
 
     public void test() {
-        PrintAJob printA = new PrintAJob();
-        PrintBJob printB = new PrintBJob();
-        PrintCJob printC = new PrintCJob();
+        ThreeThreadPrintABC.PrintAJob printA = new ThreeThreadPrintABC.PrintAJob();
+        ThreeThreadPrintABC.PrintBJob printB = new ThreeThreadPrintABC.PrintBJob();
+        ThreeThreadPrintABC.PrintCJob printC = new ThreeThreadPrintABC.PrintCJob();
 
         new Thread(printA).start();
         new Thread(printB).start();
@@ -80,4 +87,3 @@ public class Main {
     }
 
 }
-
