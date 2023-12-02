@@ -43,7 +43,9 @@ public class CanMakePaliQueries {
 
 
     /**
+     *
      *     链接：https://leetcode.cn/problems/can-make-palindrome-from-substring/
+     *     todo: try to comprehense the solution
      *
      */
     class Solution {
