@@ -1,8 +1,7 @@
 package AlgotithmExercise;
 
-import AlgotithmExercise.BinaryTree.TreeNode;
-
-import java.util.*;
+import java.util.List;
+import java.util.Stack;
 import java.util.concurrent.Semaphore;
 
 public class Main {
@@ -18,8 +17,6 @@ public class Main {
     public void test() {
 
     }
-
-
 
 
 }
