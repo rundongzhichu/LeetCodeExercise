@@ -69,7 +69,8 @@ I/O请求就进行处理。
 * selector会根据不同的事件，在各个通道上切换
 * buffer就是一个内存块，底层是有一个数组
 * 数据的读取写入是通过buffer，这个和bio有不同， bio中要么是输入流，或者是输出流。但是nio的buffer可以读也可以写，需要flip方法进行切换。
-* channel是双向的，可以返回底层操作系统的情况，比如linux，底层的操作系统通道就是双向的
+* channel是双向的，可以返回底层操作系统的情况，比如linux，底层的操作系统通道就是双向的  
+
 
 ```mermaid
 flowchart TB
@@ -107,6 +108,105 @@ NIO程序 <--data--> 缓冲区 <--channel--> 文件
 3）NIO还提供了MappedByteBuffer，可以让文件直接在内存（堆外的内存）中进行修改，而如何同步到文件由NIO来完成
 4）NIO还支持通过多个Buffer（即Buffer数组）完成读写操，即Scattering和Gatering
 
+
+#### Selector介绍和原理
+1）Java的NIO，用非阻塞的IO方式。可以用一个线程处理多个的客户端连接，就会使用到Selector（选择器）  
+2）Selector能够检测多个注册的通道上是否有事件发生（注意：多个channel以事件的方式可以注册到同一个Selector），
+如果有事件发生，便获取事件然后针对每个时间进行相应的处理，这样就可以只用一个单线程去管理多个通道，也就是管理多个连接和请求。  
+3）只有在连接真正有读写时间发生时，才会进行读写，就大大的减少了系统开销，并且不必为每个连接都创建一个线程，不用去维护多个线程。  
+4）避免多线程之间上下文切换导致的开销。  
+
+##### 特点
+1) Netty的IO线程NioEventLoop聚合了Selector（选择器，也叫多路复用器），可以同时并发处理成百上千个客户端连接。    
+2）当线程从某客户端Socket通道进行读写数据时，若没有数据可用时，该线程可以执行其他的任务。  
+3）线程通常将非阻塞IO的空闲时间用于在其他通道上执行IO操作，所以单独的线程可以管理多个输入和输出通道。  
+4）由于读写操作都是非阻塞的，这就可以充分提升IO线程的运行效率，避免由于频繁I/O阻塞导致的现场挂起。  
+5）一个I/O线程可以并发处理N个客户端连接和读写操作，这从根本上解决了传统同步阻塞I/O一连接一线程模型，架构的性能、弹性伸缩能力
+   和可靠性都得到了提升。
+
+```mermaid
+flowchart TB
+%% Nonblocking I/O
+S(Socket)---RW(Read/Write)---SL(Selector 选择器)---T(Thread)
+S1(Socket)---RW1(Read/Write)---SL
+S2(Socket)---RW2(Read/Write)---SL
+%%style S fill:#F0F0F0,stroke:#333,stroke-width:2px;
+```
+
+##### Selector 类相关方法
+Selector类的相关方法：
+Selector是一个抽象类，常用方法和说明如下：  
+public abstract class Selector implements Closeable{  
+&nbsp;&nbsp;&nbsp;&nbsp;public static Selector open();//得到一个选择器对象  
+&nbsp;&nbsp;&nbsp;&nbsp;public int select(long timeout);//监控所有注册通道，当其中有i/o操作可以进行时，将对应的SelectionKey加入到
+内部集合中并返回，参数用来设置超时时间。  
+&nbsp;&nbsp;&nbsp;&nbsp;public Set<SelectionKey> selectedKeys() //从内部集合中得到所有的SelectionKey   
+}
+
+##### 注意事项
+1）NIO中的ServerSocketChannel 功能类似SeverSocket， SocketChannel功能类似Socket。  
+2）selector相关方法说明：  
+selector.select()//阻塞  
+selector.select(1000)//阻塞1000毫秒，在1000毫秒后返回  
+selector.wakeup()// 唤醒selector
+selector.selectNow()// 不阻塞，立马返回
+
+##### NIO非阻塞网络编程原理分析图
+
+```mermaid
+flowchart TB
+%% Nonblocking I/O 原理图
+
+S(Selector 实例)
+SK(SelectionKey)---|注册|R(通信管道 )---C(Client)
+SK---|注册|R1(通信管道 )---C1(Client)
+SK --> S
+T(Thread)---S
+Server(服务器\n ServerSocketChannel\n 1.监听端口\n  2.获得和客户端连接的通道SocketChannel\n   3.每个客户端都会生成对应的通道SocketChannel)
+Server --->|注册|S  
+%%style S fill:#F0F0F0,stroke:#333,stroke-width:2px;
+```
+
+1）当客户端连接时，会通过ServerSocketChannel得到SocketChannel  
+2）将SocketChannel注册到selector上，register(Selector sel, int ops), 一个selector上可以注册多个
+SocketChannel  
+3）注册后返回一个SelectionKey和该Selector关联（集合）  
+4）Selector进行监听， select方法，返回有事件发生的通道个数。  
+5）进一步得到各个SelectionKey（有事件发生）  
+6）通过SelectionKey反向获取SocketChannel，方法channel()  
+7）可以通过得到的Channel， 完成业务处理  
+
+
+
+#### NIO 群聊系统实现
+实例要求：
+1）编写一个NIO群聊系统，实现服务器端和客户端之间的数据简单通讯（非阻塞）
+2）实现多人群聊
+3）服务器端可以检测用户上线，离线，并实现消息转发功能
+4）客户端：通过channel可以无阻塞发送消息给其他所有用户，同时可以接受其他用户发送的消息（由服务器转发得到）
+5）目的：进一步理解NIO非阻塞网络编程。
+
+[GroupChatServer](./src/main/java/com/netty/demo/nio/groupchat/GroupChatServer.java)
+[GroupChatClient](./src/main/java/com/netty/demo/nio/groupchat/GroupChatClient.java)
+
+### NIO与零拷贝
+1）零拷贝是网络编程的关键，很多性能优化都离不开
+2）在java程序中，常用的零拷贝有mmap（内存映射）和senFile。
+3）NIO中的零拷贝
+
+```mermaid
+flowchart TB
+%% Nonblocking I/O 原理图
+
+S(Selector 实例)
+SK(SelectionKey)---|注册|R(通信管道 )---C(Client)
+SK---|注册|R1(通信管道 )---C1(Client)
+SK --> S
+T(Thread)---S
+Server(服务器\n ServerSocketChannel\n 1.监听端口\n  2.获得和客户端连接的通道SocketChannel\n   3.每个客户端都会生成对应的通道SocketChannel)
+Server --->|注册|S  
+%%style S fill:#F0F0F0,stroke:#333,stroke-width:2px;
+```
 
 
 ```java 
