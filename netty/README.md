@@ -190,9 +190,80 @@ SocketChannel
 [GroupChatClient](./src/main/java/com/netty/demo/nio/groupchat/GroupChatClient.java)
 
 ### NIO与零拷贝
-1）零拷贝是网络编程的关键，很多性能优化都离不开
-2）在java程序中，常用的零拷贝有mmap（内存映射）和senFile。
-3）NIO中的零拷贝
+零拷贝：零拷贝是指计算机执行IO操作时，CPU不需要将数据从内核空间拷贝到用户空间（不需要从KB拷贝到UB），
+从而可以减少上下文切换以及CPU的拷贝时间。它是一种I/O操作优化技术。  
+
+a.零拷贝，是从操作系统的角度来说的, 就是内核缓冲区之间没有数据是重复的（只有kernel buffer有一份数据）。  
+b.零拷贝不仅带来更少的数据复制，还能带来其他的性能优势，例如更少的上下文切换，更少的CPU缓存伪共享以及无CPU校验和计算。  
+
+1）零拷贝是网络编程的关键，很多性能优化都离不开  
+2）在java程序中，常用的零拷贝有mmap（内存映射）和senFile。  
+3）NIO中的零拷贝  
+
+#### 传统IO数据读写
+**概念：**
+Hard Drive（HD）:  
+DMA copy(DMA): Direct memory access  直接内存拷贝（不使用CPU）。首先从硬盘拷贝到内核缓冲  
+kernel buffer(KB):  
+CPU copy(CPU):  
+user buffer(UB):  
+socket buffer(SB):  
+protocol engine(PE):  
+1）传统IO的一段代码
+```java
+
+
+File file = new File("test.txt");
+RandomAccessFile raf = new RandomAccessFile(file, "rw");
+
+byte[] arr = new byte[(int)file.length()];
+raf.read(arr);
+
+Socket socket = new ServerSocket(8080).accept();
+socket.getOutputStream().write(arr);
+```
+![传统IO数据传输示意](traditionalIoDataTransfer.png)
+```mermaid
+flowchart LR
+HD(Hard Dive)-->|DMA copy|KB(kernel buffer)-->|CPU copy|UB(user buffer)-->|CPU copy|SB(socket buffer)-->|DMA copy|PE(protocol engine)
+```
+
+#### mmap优化
+1）mmap通过内存映射，将文件映射到内存缓冲区，同时用户空间可以共享内核空间的数据。这样，在进行网络传输时，就可以减少
+内核空间到用户空间的拷贝次数。
+
+```mermaid
+flowchart LR
+HD(Hard Dive)-->|DMA copy|KB(kernel buffer)-->|shared|UB(user buffer)
+KB<-->|CPU copy|SB(socket buffer)-->|DMA copy|PE(protocol engine)
+```
+
+#### sendFile优化
+1）linux2.1 版本提供了sendFile函数：数据根本不需要经过用户态，直接从内核缓冲区进入到Socket Buffer，同时
+由于和用户态完全无关，就减少了一次上下文切换。
+```mermaid
+flowchart LR
+HD(Hard Dive)-->|DMA copy|KB(kernel buffer)
+KB<-->|CPU copy|SB(socket buffer)-->|DMA copy|PE(protocol engine)
+```
+2）linux 2.4 版本中，做了一些修改，避免了从内核缓冲区拷贝到Socket buffer的操作，直接拷贝到协议栈，从而再一次减少了数据拷贝,
+这里实际上还是存在kernel buffer到socket buffer 的CPU 拷贝，拷贝的信息很少，比如length，offset，消耗低，可以忽略。
+```mermaid
+flowchart LR
+HD(Hard Dive)-->|DMA copy|KB(kernel buffer)-->|copy desc|SB(socket buffer)-->|DMA copy|PE(protocol engine)
+KB-->|DMA copy|PE(protocol engine)
+```
+
+#### mmap 和senFile的区别
+1）mmap适合小数据读写，sendFile适合大文件的传输    
+2）mmap需要四次上下文切换，3次数据拷贝；sendFile需要3次上下文切换，最少2次数据拷贝。  
+3）senFile可以利用DMA方式，减少CPU拷贝，mmap不能（必须从内核拷贝到缓冲区）  
+
+#### NIO零拷贝案例
+```java
+
+
+```
 
 ```mermaid
 flowchart TB
