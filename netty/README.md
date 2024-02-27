@@ -4,7 +4,7 @@
 常用的数据结构（比如， 链表）
 
 ## netty是什么
-1）JBOSS提供的一个java开源框架
+1）JBOSS提供的一个java开源框架  
 2）是一个异步的、基于事件驱动的网络应用框架，用于快速开发高性能、高可靠性的网络io程序   
 3）主要针对在tcp协议下，面向clients端的高并发应用，或者p2p场景下的大量数据持续传输的应用  
 4）Netty本质是一个NIO框架，适用于服务器通讯相关的多种应用场景
@@ -267,8 +267,7 @@ KB-->|DMA copy|PE(protocol engine)
 
 ```mermaid
 flowchart TB
-%% Nonblocking I/O 原理图
-
+%% Nonblocking I/O 原理图  
 S(Selector 实例)
 SK(SelectionKey)---|注册|R(通信管道 )---C(Client)
 SK---|注册|R1(通信管道 )---C1(Client)
@@ -279,6 +278,50 @@ Server --->|注册|S
 %%style S fill:#F0F0F0,stroke:#333,stroke-width:2px;
 ```
 
+### Java AIO基本介绍
+1）JDK 7引入了Asynchronous I/O， 即AIO。在进行I/O编程中常用到两种模式： Reactor和Proactor。Java NIO 就是Reactor，当有事件触发时，服务端得到通知进行相应的处理。
+2）AIO即NIO2.0，叫做异步不阻塞IO。 AIO引入异步通道概念，采用了Proactor模式，简化了程序编写，有效的请求才启动线程，他的特点是先由操作系统完成后才通知
+服务端程序启动线程去处理，一般适用于连接数较多且连接时间较长的应用。
+3）目前AIO还没有广泛应用，Netty也是基于NIO，而不是AIO。
+
+## BIO NIO AIO对比表
+| |BIO|NIO|AIO|
+|---|---|---|---|
+|IO模型|同步阻塞|同步非阻塞（多路复用）|异步非阻塞|
+|编程难度|简单|复杂|复杂|
+|可靠性|差|好|好|
+|吞吐量|低|高|高|
+
+
+# Netty概述
+## 原生NIO存在的问题
+1）NIO的类库和API复杂，使用麻烦。
+2）需要具备其他额外技能：要熟悉java多线程编程，因为NIO编程涉及到Reactor模式。
+3）开发工作量和难度都非常大：例如客户端面临断连重连、网络闪断、半包读写、失败缓存、网络拥塞和异常流的处理等等。
+4）JDK NIO的bug：例如臭名昭著的Epoll Bug，他会导致Selector空轮询，最终导致CPU 100%。直到JDK 1.7 版本依旧存在，没有得到根本解决。
+
+## Netty的优点
+Netty对JDk自带的NIO的API进行了封装，解决了上述问题：
+1）设计优雅：适用于各种传输类型的统一API阻塞和非阻塞Socket；基于灵活且可扩展的事件模型，可以清晰的分离关注点；高度可定制的线程模型-单线程，一个或多个线程池。
+2）使用方便：详细记录的Javadoc，没有其他依赖项
+3）高性能、吞吐量更高：延迟更低减少资源消耗；最小化不必要的内存复制。
+4）安全：完整的SSL/TLS和StartTLS支持。
+5）社区活跃、不断更新：社区活跃、版本迭代周期短，发现bug可以被及时修复，同时更多的新功能会被加入。
+
+
+
+
+
+<table>
+  <tr>
+    <th>标题1</th>
+    <th>标题2</th>
+  </tr>
+  <tr>
+    <td>内容1</td>
+    <td>内容2</td>
+  </tr>
+</table>
 
 ```java 
 # 这是一个代码示例 
