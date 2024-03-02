@@ -20,28 +20,7 @@ public class Main {
 
     }
 
-    public List<Integer> beautifulIndices(String s, String a, String b, int k) {
-        int slen = s.length();
-        int alen = a.length();
-        int blen = b.length();
 
-        List<Integer> beautiIndexes = new ArrayList<>();
-        TreeSet<Integer> set = new TreeSet<>();
-        for (int i = 0; i <= slen - alen; i++) {
-            String istr = s.substring(i, i + alen);
-            for (int j = 0; j <= slen - blen; j++) {
-                String jstr = s.substring(j, j + blen);
-                if(istr.equals(a) && jstr.equals(b) && Math.abs(i-j) <= k ) {
-                    set.add(i);
-                }
-            }
-        }
-        for (Integer num :
-                set) {
-            beautiIndexes.add(num);
-        }
-        return beautiIndexes;
-    }
 
 }
 
