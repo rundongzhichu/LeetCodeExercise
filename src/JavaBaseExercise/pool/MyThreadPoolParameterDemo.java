@@ -1,4 +1,4 @@
-package JavaBaseExercise;
+package JavaBaseExercise.pool;
 
 import java.util.Arrays;
 import java.util.concurrent.*;
