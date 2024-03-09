@@ -362,7 +362,7 @@ I/O复用结合线程池，就是Reactor模式基本设计思想：
 4）如果不是建立连接时间，则Reactor会分发调用连接对应的Handler来响应。
 5）Handler会完成Read->业务处理->Send 的完整业务流程。
 
-方案的优缺点：
+**方案的优缺点：**  
 1）优点：模型简单，没有多线程、进程通信、竞争问题，全部都在一个线程中完成。  
 2）缺点：性能问题，只有一个线程，无法完全发挥多核CPU的性能。Handler在处理某个连接上的任务时，整个进程无法处理其他连接事件，
 很容易导致性能瓶颈。  
@@ -370,9 +370,39 @@ I/O复用结合线程池，就是Reactor模式基本设计思想：
 4）使用场景：客户端的数量有限，业务处理非常快速，比如Redis的业务处理时间复杂度为O(1)的情况。  
 
 ##### 单Reactor多线程
+![单Reactor多线程原理图.png](单Reactor多线程原理图.png)
+1）Reactor对象通过select监控客户端请求事件，收到事件后，通过dispatch完成分发。  
+2）如果是建立连接的请求，则Acceptor通过accept处理链接请求，然后创建一个Handler对象处理完成连接后的各种事件。  
+3）如果不是连接请求，则由reactor分发调用连接对应的handler来处理。  
+4）handler只负责相应事件，不做具体的业务处理，通过read读取数据后，会分发给后面的worker线程池的某个线程处理业务。  
+5）worker线程池会分配独立线程完成真正的业务，并将结果返回给handler。  
+6）handler收到响应后，通过send将结果返回给client。  
+
+__方案的优缺点：__  
+1）优点：可以充分利用多核CPU的处理能力。      
+2）缺点：多线程数据共享和访问比较复杂，reactor处理所有的事件的监听和响应， reactor对象本身在单线程运行，在高并发场景容易出现性能瓶颈。
 
 
 ##### 主从Reactor多线程
+![主从Reactor多线程原理图.png](主从Reactor多线程原理图.png)
+**背景**
+针对单Reactor多线程模型中，Reactor在单线程中运行，高并发场景下容易成为性能瓶颈，可以让reactor在多线程中运行。   
+1）Reactor主线程MainReactor对象通过select监听连接事件，收到事件后，通过acceptor处理连接事件。  
+2）当Acceptor处理连接事件后，MainReactor将连接分配给SubReactor。  
+3）subReactor将连接加入到连接队列进行监听，并创建handler进行各种事件处理。  
+4）当有新事件发生时，subreactor就会调用对应的handler进行处理。  
+5）handler通过read读取数据，分发给后面的worker线程进行处理。  
+6）worker线程池会分配独立的worker线程进行业务处理，并返回结果给handler。  
+7）handler收到响应结果后，在通过send奖结果返回给clieant。  
+8）Reactor主线程可以对应多个reactor子线程，即MainReactor可以关联多个SubReactor。  
+
+__方案的优缺点：__  
+1）优点：父线程和子线程的数据交互简单职责明确，父线程只需要接收新连接，子线程完成后续的业务处理。  
+2）优点：父线程和子线程的数据交互简单，Reactor主线程只需要把新链接传给子线程，子线程无需返回数据。  
+3）缺点：编程复杂度高。  
+结合实例：这种模型在许多项目中广泛使用，包括Nginx主从Reactor多进程模型，Memcached主从多线程，Netty主从多线程模型的支持。  
+
+
 
 
 <br/>
