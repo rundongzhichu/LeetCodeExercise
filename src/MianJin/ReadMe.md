@@ -1,7 +1,204 @@
-#《Java核心技术 卷I》静态内部类这一小节提到，“与常规内部类不同，静态内部类可以有静态字段和方法”。也就是常规内部类是不能有静态字段和方法的，为什么？
+#<span id="java">Java</span>
+##Java Base
+###1.《Java核心技术 卷I》静态内部类这一小节提到，“与常规内部类不同，静态内部类可以有静态字段和方法”。也就是常规内部类是不能有静态字段和方法的，为什么？
 静态字段和方法在类加载的时候就会存在于内存中，但是外部类加载的时候并不会加载常规内部类。常规内部类只有在外部类实例化之后才加载，
 而静态字段或方法是在类加载之后才存在的。如果在外部类还没有实例化的时候调用非静态内部类的静态字段或方法，内部类还没加载是不能创建静态字段或方法的。
 
 因此，如果想在内部类中定义静态字段和方法，内部类本身也必须被声明为是静态的。
 另外书中还注释了一句话：“在接口中声明的内部类自动是static和public。”。因为接口不能被实例化，可以将接口看做是一个抽象类，其中的方法没有具体实现
 ，因此不能通过实例化一个接口来加载内部类、创建内部类的对象。
+
+##<span id="juc">JUC</span>
+###Pool 技术
+池话设计应该不是一个新名词。我们常见的如java线程池、jdbc连接池、redis连接池等就是这类设计的代表实现。这种设计会初始预设资源，解决的问题就是抵消
+每次获取资源的消耗，如创建线程的开销，获取远程连接的开销等。就好比你去食堂打饭，打饭的大妈会先把饭盛好几份放那里，你来了就直接拿着饭盒加菜即可，
+不用再临时又盛饭又打菜，效率就高了。除了初始化资源，池化设计还包括如下这些特征：池子的初始值、池子的活跃值、池子的最大值等，这些特征可以直接映射到java线
+程池和数据库连接池的成员属性中。
+
+####[java 线程池](#java)
+Java线程池是多线程编程中一项重要的工具，它能够有效地管理和调度线程，提高程序的并发性能。线程池的扩容机制是线程池的关键特性之一，
+它允许根据工作负载的变化动态地增加或减少线程数量。
+
+##### 线程池主要参数
+线程池的主要参数：  
+corePoolSize（核心线程数）：线程池中一直存活的线程数量，即使它们处于空闲状态也不会被销毁。  
+maximumPoolSize（最大线程数）：线程池中允许的最大线程数量，包括空闲状态的线程和正在执行任务的线程。  
+workQueue（工作队列）：存放等待执行的任务的队列。当任务提交到线程池时，会先放入工作队列。  
+keepAliveTime（线程空闲时间）：空闲线程的最大存活时间，超过这个时间空闲线程将被销毁，仅当线程数量超过核心线程数时生效。  
+RejectedExecutionHandler（任务拒绝处理器）：当任务无法被执行时的处理策略。
+
+##### [线程池拒绝策略][拒绝策略]
+拒绝策略都是主线程去执行的。  
+内置的四种拒绝策略：  
+1)[CallerRunPolicy（调用者运行策略)](#reject1)  
+2)[AbortPolicy（中止策略)](#reject2)  
+3)[DiscardPolicy（丢弃策略）](#reject3)  
+4)[DiscardOldestPolicy（弃老策略）](#reject4)
+
+**拒绝策略顶层接口**
+```java
+public interface RejectedExecutionHandler {
+    void rejectedExecution(Runnable r, ThreadPoolExecutor executor);
+}
+```
+1）<span id="reject1">CallerRunPolicy（调用者运行策略)</span>
+功能：当触发拒绝策略时，只要线程池没有关闭，就由提交任务的当前线程处理。  
+
+使用场景：一般在不允许失败的、对性能要求不高、并发量较小的场景下使用，因为线程池一般情况下不会关闭，也就是提交的任务一定会被运行，但是由于是调用者
+线程自己执行的，在线程池满载的情况下多次提交任务时，就会阻塞后续任务执行，性能和效率自然就慢了。
+```java
+
+public static class CallerRunsPolicy implements RejectedExecutionHandler {
+    public CallerRunsPolicy() { }
+    public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+        if (!e.isShutdown()) {
+            r.run();
+        }
+    }
+}
+```
+
+2）<span id="reject2"> AbortPolicy（中止策略）</span>
+功能：当触发拒绝策略时，直接抛出拒绝执行的异常，中止策略的意思也就是打断当前执行流程  
+使用场景：这个就没有特殊的场景了，但是一点要正确处理抛出的异常。ThreadPoolExecutor中默认的策略就是AbortPolicy，
+ExecutorService接口的系列ThreadPoolExecutor因为都没有显示的设置拒绝策略，所以默认的都是这个。但是请注意，ExecutorService中的线程池实例
+队列都是无界的，也就是说把内存撑爆了都不会触发拒绝策略。当自己自定义线程池实例时，使用这个策略一定要处理好触发策略时抛的异常，因为他会打断当前的执行流程。
+```java
+public static class AbortPolicy implements RejectedExecutionHandler {
+        public AbortPolicy() { }
+        public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+            throw new RejectedExecutionException("Task " + r.toString() +
+                                                 " rejected from " +
+                                                 e.toString());
+        }
+    }
+```
+
+3)<span id="reject3"> DiscardPolicy（丢弃策略）</span>  
+功能：直接静悄悄的丢弃这个任务，不触发任何动作
+使用场景：如果你提交的任务无关紧要，你就可以使用它 。因为它就是个空实现，会悄无声息的吞噬你的的任务。所以这个策略基本上不用了
+```java
+public static class DiscardPolicy implements RejectedExecutionHandler {
+        public DiscardPolicy() { }
+        public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+        }
+    }
+```
+
+3)<span id="reject4"> DiscardOldestPolicy（弃老策略）</span>  
+功能：如果线程池未关闭，就弹出队列头部的元素，然后尝试执行
+使用场景：这个策略还是会丢弃任务，丢弃时也是毫无声息，但是特点是丢弃的是老的未执行的任务，而且是待执行优先级较高的任务。基于这个特性，我能想到的场
+景就是，发布消息，和修改消息，当消息发布出去后，还未执行，此时更新的消息又来了，这个时候未执行的消息的版本比现在提交的消息版本要低就可以被丢弃了。
+因为队列中还有可能存在消息版本更低的消息会排队执行，所以在真正处理消息的时候一定要做好消息的版本比较.
+
+```java
+public static class DiscardOldestPolicy implements RejectedExecutionHandler {
+    public DiscardOldestPolicy() { }
+    public void rejectedExecution(Runnable r, ThreadPoolExecutor e) {
+        if (!e.isShutdown()) {
+            e.getQueue().poll();
+            e.execute(r);
+        }
+    }
+}
+```
+
+####<a href="#label">ForkJoinPool</a>
+ForkJoinPool 是 JDK7 引入的，由 Doug Lea 编写的高性能线程池。核心思想是将大的任务拆分成多个小任务（即fork），
+然后在将多个小任务处理汇总到一个结果上（即join），非常像MapReduce处理原理。同时，它提供基本的线程池功能，
+支持设置最大并发线程数，支持任务排队，支持线程池停止，支持线程池使用情况监控，也是AbstractExecutorService的子类，
+主要引入了“工作窃取”机制，在多CPU计算机上处理性能更佳。其广泛用在java8的stream中。
+
+ForkJoinPool 并不是为了替代 ThreadPoolExecutor 而出现的，而是作为一种它的补充。在处理 CPU 密集型任务的时候，
+它的性能比 ThreadPoolExecutor 更好，而如果你是 I/O 密集型任务的时候，除非配置 ManagedBlocker 一起使用，否则不建议使用它。
+
+
+分治法的基本思想是一个规模为N的问题分解为K个规模较小的子问题，这些子问题的相互独立且与原问题的性质相同，求出子问题的解之后，将这些解合并，
+就可以得到原有问题的解
+
+![ForkJoin任务模型图.png](ForkJoin任务模型图.png)
+
+##### 工作窃取
+工作窃取是指当某个线程的任务队列中没有可执行任务的时候，从其他线程的任务队列中窃取任务来执行，以充分利用工作线程的计算能力，
+减少线程由于获取不到任务而造成的空闲浪费。
+
+
+
+#Redis
+
+#linux
+
+#Spark
+
+# Hbase
+
+# Zookeeper
+
+# kafka
+
+#Spring
+### [1. Bean的循环依赖问题][循环依赖]
+当两个或更多个Bean之间相互依赖时，就会出现Spring循环依赖的问题。这意味着，每个Bean都需要其他Bean才能被创建，而其他Bean又需要该Bean才能被创建。
+这种情况下，Spring IoC容器会抛出一个异常，告诉你存在循环依赖。
+![循环依赖示意图.png](循环依赖示意图.png)
+```java
+@Component
+public class C {
+   @Autowired
+   private D d;
+}
+@Component
+public class D {
+   @Autowired
+   private C c;
+}
+```
+
+解决循环依赖的方案：
+Spring 中利用三级缓存解决循环依赖的根本就是为了避免引用对象的循环创建:
+
+>singletonObjects：用于存放单例bean实例的缓存，即作用域为singleton的bean。当创建完一个bean后，Spring会将其放入singletonObjects缓存中。
+>在后续获取该bean时，Spring会直接从该缓存中获取，不再需要重新创建。  
+
+>earlySingletonObjects：用于存放创建中的bean实例的缓存。在创建一个bean的过程中，如果需要引用到该bean，则会先从earlySingletonObjects缓存
+> 中获取。如果该缓存中不存在该bean的实例，则会通过实例化工厂创建一个新的bean实例。  
+
+>singletonFactories：用于存放创建中的bean实例的工厂缓存。在创建一个bean的过程中，如果需要引用到该bean，则会先从singletonFactories缓存中获
+> 取。如果该缓存中不存在该bean的工厂实例，则会通过实例化工厂创建一个新的bean工厂实例。在后续获取该bean时，Spring会从该缓存中获取bean工厂实例，
+> 并通过该工厂创建新的bean实例。
+
+在以上三个缓存中，earlySingletonObjects缓存和singletonFactories缓存的作用是相同的，即存放创建中的bean实例。
+它们的区别在于earlySingletonObjects缓存存放的是已经创建但还没有完全初始化的bean实例，而singletonFactories缓存存放的是bean实例工厂。
+
+```java
+public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements SingletonBeanRegistry {
+    // 一级缓存，保存 beanName 和 实例化、初始化好的完整 bean 对象
+    private final Map<String, Object> singletonObjects = new ConcurrentHashMap<>(256);
+    // 二级缓存，保存 beanName 和 未初始化的 bean 对象
+    private final Map<String, Object> earlySingletonObjects = new HashMap<>(16);  
+    // 三级缓存，保存 beanName 和 lambda 表达式 () -> getEarlyBeanReference(beanName, mbd, bean), 保存bean的创建工厂
+    private final Map<String, ObjectFactory<?>> singletonFactories = new HashMap<>(16);
+}
+```
+当我们获取一个bean时，Spring首先会从singletonObjects缓存中查找是否存在该bean的实例。如果存在，则直接返回该实例；否则，Spring会检查该bean
+是否在earlySingletonObjects缓存中。如果在，Spring会等待该bean完全初始化后再返回该bean实例；否则，Spring会检查singletonFactories缓存中
+是否存在该bean实例的工厂。如果存在，Spring会通过该工厂创建一个新的bean实例，并将其放入earlySingletonObjects缓存中，等待其完全初始化后再放
+入singletonObjects缓存中。
+
+
+##SpringMVC
+
+
+##Spring Boot
+
+
+##Spring Cloud
+
+
+## 算法
+
+
+
+
+[拒绝策略]:https://developer.aliyun.com/article/1382341?spm=a2c6h.14164896.0.0.3e4947c5jIzSlb&scm=20140722.S_community@@%E6%96%87%E7%AB%A0@@1382341._.ID_1382341-RL_%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%8B%92%E7%BB%9D%E7%AD%96%E7%95%A5-LOC_search~UND~community~UND~item-OR_ser-V_3-P0_2
+[循环依赖]:https://developer.aliyun.com/article/1436029?spm=a2c6h.14164896.0.0.5f8447c5ADJHwB&scm=20140722.S_community@@%E6%96%87%E7%AB%A0@@1436029._.ID_1436029-RL_Spring%20%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98%E5%8E%9F%E7%90%86-LOC_search~UND~community~UND~item-OR_ser-V_3-P0_4
