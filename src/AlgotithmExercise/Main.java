@@ -2,7 +2,7 @@ package AlgotithmExercise;
 
 
 import java.math.BigDecimal;
-import java.util.PriorityQueue;
+import java.util.*;
 import java.util.concurrent.Semaphore;
 
 public class Main {
