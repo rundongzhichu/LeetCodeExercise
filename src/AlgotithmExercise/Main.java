@@ -20,6 +20,22 @@ public class Main {
     }
 
 
+    public String capitalizeTitle(String title) {
+        String[] words = title.split(" ");
+        StringBuilder sb = new StringBuilder();
+
+        for (String word :
+                words) {
+            int len = word.length();
+            if(len == 1 || len == 2) {
+                sb.append(" ").append(word.toLowerCase());
+            } else {
+                sb.append(" ").append(Character.toUpperCase(word.charAt(0))).append(word.substring(1, len).toLowerCase());
+            }
+        }
+        return sb.toString().trim();
+    }
+
 }
 
 
