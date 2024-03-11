@@ -1,6 +1,6 @@
-#<span id="java">Java</span>
-##Java Base
-###1.《Java核心技术 卷I》静态内部类这一小节提到，“与常规内部类不同，静态内部类可以有静态字段和方法”。也就是常规内部类是不能有静态字段和方法的，为什么？
+# <span id="java">Java</span>
+## Java Base
+### 1.《Java核心技术 卷I》静态内部类这一小节提到，“与常规内部类不同，静态内部类可以有静态字段和方法”。也就是常规内部类是不能有静态字段和方法的，为什么？
 静态字段和方法在类加载的时候就会存在于内存中，但是外部类加载的时候并不会加载常规内部类。常规内部类只有在外部类实例化之后才加载，
 而静态字段或方法是在类加载之后才存在的。如果在外部类还没有实例化的时候调用非静态内部类的静态字段或方法，内部类还没加载是不能创建静态字段或方法的。
 
@@ -8,14 +8,14 @@
 另外书中还注释了一句话：“在接口中声明的内部类自动是static和public。”。因为接口不能被实例化，可以将接口看做是一个抽象类，其中的方法没有具体实现
 ，因此不能通过实例化一个接口来加载内部类、创建内部类的对象。
 
-##<span id="juc">JUC</span>
-###Pool 技术
+## <span id="juc">JUC</span>
+### Pool 技术
 池话设计应该不是一个新名词。我们常见的如java线程池、jdbc连接池、redis连接池等就是这类设计的代表实现。这种设计会初始预设资源，解决的问题就是抵消
 每次获取资源的消耗，如创建线程的开销，获取远程连接的开销等。就好比你去食堂打饭，打饭的大妈会先把饭盛好几份放那里，你来了就直接拿着饭盒加菜即可，
 不用再临时又盛饭又打菜，效率就高了。除了初始化资源，池化设计还包括如下这些特征：池子的初始值、池子的活跃值、池子的最大值等，这些特征可以直接映射到java线
 程池和数据库连接池的成员属性中。
 
-####[java 线程池](#java)
+#### [java 线程池](#java)
 Java线程池是多线程编程中一项重要的工具，它能够有效地管理和调度线程，提高程序的并发性能。线程池的扩容机制是线程池的关键特性之一，
 它允许根据工作负载的变化动态地增加或减少线程数量。
 
@@ -103,7 +103,7 @@ public static class DiscardOldestPolicy implements RejectedExecutionHandler {
 }
 ```
 
-####<a href="#label">ForkJoinPool</a>
+#### <a href="#label">ForkJoinPool</a>
 ForkJoinPool 是 JDK7 引入的，由 Doug Lea 编写的高性能线程池。核心思想是将大的任务拆分成多个小任务（即fork），
 然后在将多个小任务处理汇总到一个结果上（即join），非常像MapReduce处理原理。同时，它提供基本的线程池功能，
 支持设置最大并发线程数，支持任务排队，支持线程池停止，支持线程池使用情况监控，也是AbstractExecutorService的子类，
@@ -124,11 +124,11 @@ ForkJoinPool 并不是为了替代 ThreadPoolExecutor 而出现的，而是作�
 
 
 
-#Redis
+# Redis
 
-#linux
+# linux
 
-#Spark
+# Spark
 
 # Hbase
 
@@ -136,7 +136,7 @@ ForkJoinPool 并不是为了替代 ThreadPoolExecutor 而出现的，而是作�
 
 # kafka
 
-#Spring
+# Spring
 ### [1. Bean的循环依赖问题][循环依赖]
 当两个或更多个Bean之间相互依赖时，就会出现Spring循环依赖的问题。这意味着，每个Bean都需要其他Bean才能被创建，而其他Bean又需要该Bean才能被创建。
 这种情况下，Spring IoC容器会抛出一个异常，告诉你存在循环依赖。
@@ -186,13 +186,13 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 入singletonObjects缓存中。
 
 
-##SpringMVC
+## SpringMVC
 
 
-##Spring Boot
+## Spring Boot
 
 
-##Spring Cloud
+## Spring Cloud
 
 
 ## 算法
