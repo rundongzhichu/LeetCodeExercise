@@ -1,6 +1,7 @@
 package AlgotithmExercise.DoublePointer;
 
 public class RemoveNthFromEnd {
+
     public ListNode removeNthFromEnd(ListNode head, int n) {
         ListNode tail = head;
         ListNode rm = head;
