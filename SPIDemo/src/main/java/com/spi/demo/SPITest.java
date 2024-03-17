@@ -1,4 +1,4 @@
-package com.spi.demo.spidemo;
+package com.spi.demo;
 
 public class SPITest {
 

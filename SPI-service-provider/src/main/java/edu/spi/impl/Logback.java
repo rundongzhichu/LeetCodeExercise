@@ -1,8 +1,9 @@
-package edu.jiangxuan.up.spi.service;
+package edu.spi.impl;
 
-import edu.jiangxuan.up.spi.Logger;
+import edu.spi.api.Logger;
 
 public class Logback implements Logger {
+
     @Override
     public void info(String s) {
         System.out.println("Logback info 打印日志：" + s);

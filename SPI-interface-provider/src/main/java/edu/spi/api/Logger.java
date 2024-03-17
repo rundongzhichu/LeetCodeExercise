@@ -1,4 +1,4 @@
-package edu.jiangxuan.up.spi;
+package edu.spi.api;
 
 public interface Logger {
     void info(String msg);

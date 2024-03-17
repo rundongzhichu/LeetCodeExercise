@@ -1,6 +1,6 @@
-package com.spi.demo.spidemo;
+package com.spi.demo;
 
-import edu.jiangxuan.up.spi.Logger;
+import edu.spi.api.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
