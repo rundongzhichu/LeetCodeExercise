@@ -20,6 +20,25 @@ public class Main {
 
     }
 
+    public int distinctIntegers(int n) {
+//        Set<Integer> set = new HashSet<>();
+//        set.add(n);
+//        for (int i = 0; i < 1000000000; i++) {
+//            for (int j = 1; j <= n; j++) {
+//                boolean flag = true;
+//                for (int x :
+//                        set) {
+//                    if (x % j != 1) {
+//                        flag = false;
+//                        break;
+//                    }
+//                }
+//                if(flag)
+//                    set.add(j);
+//            }
+//        }
+        return n-1;
+    }
 
 
 }

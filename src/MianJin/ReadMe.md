@@ -6,6 +6,16 @@
 
 ### java内存模型
 
+### java 进程间的通讯方式
+使用ProcessBuilder启动子进程.
+使用Socket进行网络通信。
+使用Java RMI（远程方法调用）。
+使用JMS（Java Message Service）。
+使用Files或MappedByteBuffer进行文件映射。
+使用System.in, System.out, System.err进行父子进程间通信。
+使用中间件，消息队列，数据库等。
+
+
 ## <span id="juc">JUC</span>
 ### Pool 技术
 池话设计应该不是一个新名词。我们常见的如java线程池、jdbc连接池、redis连接池等就是这类设计的代表实现。这种设计会初始预设资源，解决的问题就是抵消
@@ -144,9 +154,18 @@ synchronized关键字则用于更广泛的同步，它可以修饰方法、代�
 **3、线程的生命周期**  
 ![ThreadLifeCycle.png](ThreadLifeCycle.png)
 
+
+
 **4、threadLocal可能造成的问题以及解决方案**
 
 
+# Kubernate
+
+# Nginx
+
+# lightSpeed
+jenkins docker udeploy
+teckton harness
 
 
 # Redis

@@ -1,0 +1,3 @@
+ChildProcess's default charset is: UTF-8
+【get message from father】：2
+[hello child process, I am your father]
