@@ -179,6 +179,33 @@ teckton harness
 # Zookeeper
 
 # kafka
+## kafka面经
+**1.Kafka高效读盘写盘**
+Kafka 的消息是保存或缓存在磁盘上的，一般认为在磁盘上读写数据是会降低性能的，因为寻址会比较消耗时间，但是实际上，Kafka 的特性之一就是高吞吐率。Kafka 之所以能这么快，无非是：顺序写磁盘、大量使用内存页 、零拷贝技术的使用、批量发送、数据压缩。  
+
+为了高效的写盘，Kafka使用了两种策略。  
+(1) 追加写提高效率：Kafka是将partition的数据写在磁盘的(消息日志)，不过Kafka只允许追加写入(底层磁盘原理：顺序访问而不是随机访问，没有寻址时间，加快写入速度)，避免缓慢的随机 I/O 操作。  
+(2) 攒一波一次写/批量写：Kafka也不是partition一有数据就立马将数据写到磁盘上，它会先缓存一部分，等到足够多数据量或等待一定的时间再批量写入(flush)。  
+
+前面讲解到了生产者往topic里丢数据是存在partition上的，而partition持久化到磁盘是IO顺序访问的，并且是先写缓存，隔一段时间或者数据量足够大的时候才
+批量写入磁盘的，即写盘的时候通过“顺序IO+批量写”达到最快写盘。  
+
+在读的时候也很有讲究，通过零拷贝技术加快读盘速度，每个消费者通过offset记录自己的当前读取位置。  
+
+零拷贝：正常的读磁盘数据是需要将内核态数据拷贝到用户态的，而Kafka 通过调用sendfile()直接从内核空间（DMA Direct Memery Access直接内存通过）到内核空间（Socket的），少做了一步拷贝的操作。  
+![kafaZeroCopy](kafaZeroCopy.png)
+
+**2.如何有序的消费不同分区的消息**
+1).kafka topic只设置一个partition分区。
+2).producer将消息发送到指定的分区。
+3).局部消费顺序：多个partition局部有序
+生产时：producer在把消息发送到partition的时候，当key非空时，用key的hash值对partition个数取模，决定要把消息发送到哪个partition上，
+可以指定一样的key，这样这个key的消息在单个partition内是有序的。  
+注：当key为空时，消息随机发送到各个分区。规则再各个版本会有不同，有的是采用轮询方式，有的随机，有的是一定时间内发送给固定的partition，隔一段时间后随机换一个。  
+消费时：在一个消费者组中的多个消费者消费一个topic时，一个消费这组中只能有一个消费者消费该消息，topic下的每个分区只属于组中的一个消费者，因此是有序的。 
+
+**2.如何有序的消费不同分区的消息**
+
 
 # Mysql
 ## 架构原理图
@@ -265,3 +292,4 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 
 [拒绝策略]:https://developer.aliyun.com/article/1382341?spm=a2c6h.14164896.0.0.3e4947c5jIzSlb&scm=20140722.S_community@@%E6%96%87%E7%AB%A0@@1382341._.ID_1382341-RL_%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%8B%92%E7%BB%9D%E7%AD%96%E7%95%A5-LOC_search~UND~community~UND~item-OR_ser-V_3-P0_2
 [循环依赖]:https://developer.aliyun.com/article/1436029?spm=a2c6h.14164896.0.0.5f8447c5ADJHwB&scm=20140722.S_community@@%E6%96%87%E7%AB%A0@@1436029._.ID_1436029-RL_Spring%20%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98%E5%8E%9F%E7%90%86-LOC_search~UND~community~UND~item-OR_ser-V_3-P0_4
+[kafa高效读写]:https://blog.csdn.net/qq_36963950/article/details/120817232  
