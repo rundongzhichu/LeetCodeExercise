@@ -5,7 +5,9 @@ import java.util.concurrent.locks.ReentrantLock;
 public class VirtualThreadDemo {
 
     /**
+     * 这个命令执行编译后带包路径的java文件
      * E:\IdeaProjects\LeetCodeExercise\Java20\src\main\java>java --enable-preview demo.java20.base.thread.VirtualThreadDemo
+     * 这个命令可以直接执行源文件
      * java --enable-preview --source 20 VirtualThreadDemo.java -Xlint:preview
      *
      * idea 直接build运行的话会出现（这个可能是idea本身的问题，java命令行能执行）：
