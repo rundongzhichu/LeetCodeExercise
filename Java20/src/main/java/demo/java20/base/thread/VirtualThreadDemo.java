@@ -5,6 +5,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class VirtualThreadDemo {
 
     /**
+     *
+     * https://blog.csdn.net/tianjindong0804/article/details/135048972
      * 这个命令执行编译后带包路径的java文件
      * E:\IdeaProjects\LeetCodeExercise\Java20\src\main\java>java --enable-preview demo.java20.base.thread.VirtualThreadDemo
      * 这个命令可以直接执行源文件

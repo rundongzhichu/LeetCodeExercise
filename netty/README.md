@@ -405,14 +405,42 @@ __方案的优缺点：__
 
 ## Netty模型
 
+### 工作原理示意图-简单版
+Netty主要基于主从Reactors多线程模型（如图）做了一定的改进，其中主从Reactor多线程模型有多个Reactor
+![NettySchematicSimpleVersion.png](NettySchematicSimpleVersion.png )
+![BossGroupWorkerGroupSchematicDiagram.png](BossGroupWorkerGroupSchematicDiagram.png)
+1) BossGroup线程维护Selector，只关注Accept
+2) 当接收到Accept事件，获取到对应的SocketChannel，封装成NIOSocketChannel并注册到Worker线程（时间循环），并进行维护
+3) 当Worker线程监听到Selector中的通道发生自己感兴趣的事件后，就进行处理（就由Handler来完成），注意handler已经加入到通道。
+
+### 工作原理示意图-详细版
+![NettyWorkFramework.png](NettyWorkFramework.png)
+1) Netty抽象出两组线程池，BossGroup专门负责接收客户端的连接，WorkerGroup专门负责网络的读写
+2) BossGroup和WorkerGroup类型都是NIOEventLoopGroup
+3) NioEventLoopGroup相当于一个事件循环组，这个组中含有多个时间循环，每个时间循环是NioEventLoop
+4) NioEventLoop 表示一个不断循环的执行处理任务的线程，每个NioEventLoop都有一个Selector，用于监听绑定在其上的socket网络通讯
+5) NioEventLoopGroup 可以有多个线程，即可以含有多个NioEventLoop
+6) 每个Boss NioEventLoop 执行步骤有三步：  
+   - [x] 轮询accept事件
+   - 处理accept事件，与client建立连接，生成NioSocketChannel，并将其注册到某个worker NIOEventLoop的selector
+   - 处理任务队列的任务，即runAllTasks
+7) 每个worker NIOEventLoop循环执行的步骤：
+   - 轮询read，write事件
+   - 处理io事件，即read write事件，在对应NioSocketChannel处理
+   - 处理任务队列的任务，即RunAllTasks
+8) 每个Worker NIOEventLoop处理作业时，会使用Pipeline（管道）， pipeline中包含了channel， 即通过pipeline可以获取到对应的通道，管道中维护了很多的处理器。
+
+
+
+
+
+
 
 
 
 
 <br/>
 <br/>
-
-
 <table>
   <tr>
     <th>标题1</th>
