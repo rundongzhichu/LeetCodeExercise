@@ -7,13 +7,13 @@
 ### java内存模型
 
 ### java 进程间的通讯方式
-使用ProcessBuilder启动子进程.
-使用Socket进行网络通信。
-使用Java RMI（远程方法调用）。
-使用JMS（Java Message Service）。
-使用Files或MappedByteBuffer进行文件映射。
-使用System.in, System.out, System.err进行父子进程间通信。
-使用中间件，消息队列，数据库等。
+使用ProcessBuilder启动子进程.  
+使用Socket进行网络通信。  
+使用Java RMI（远程方法调用）。  
+使用JMS（Java Message Service）。  
+使用Files或MappedByteBuffer进行文件映射。  
+使用System.in, System.out, System.err进行父子进程间通信。  
+使用中间件，消息队列，数据库等。  
 
 
 ## <span id="juc">JUC</span>

@@ -20,26 +20,31 @@ public class Main {
 
     }
 
-    public int distinctIntegers(int n) {
-//        Set<Integer> set = new HashSet<>();
-//        set.add(n);
-//        for (int i = 0; i < 1000000000; i++) {
-//            for (int j = 1; j <= n; j++) {
-//                boolean flag = true;
-//                for (int x :
-//                        set) {
-//                    if (x % j != 1) {
-//                        flag = false;
-//                        break;
-//                    }
-//                }
-//                if(flag)
-//                    set.add(j);
-//            }
-//        }
-        return n-1;
+    public List<List<String>> groupAnagrams(String[] strs) {
+        Map<String, List<String>> res = new HashMap<>();
+        for (int i = 0; i < strs.length; i++) {
+            String key = calcuKey(strs[i]);
+            List<String> arr = res.getOrDefault(key, new ArrayList<>());
+            arr.add(strs[i]);
+            res.put(key, arr);
+        }
+        return res.values().stream().toList();
     }
 
+    public String calcuKey(String str) {
+        int str1Len = str.length();
+        int[] alpas = new int[26];
+        for (int i = 0; i < str1Len; i++) {
+            alpas[str.charAt(i) - 'a'] ++;
+        }
+        StringBuilder sb = new StringBuilder("");
+        for (int i = 0; i < 26; i++) {
+            if(alpas[i] != 0) {
+                sb.append(alpas[i]).append((char)('a' + i));
+            }
+        }
+        return sb.toString();
+    }
 
 }
 
