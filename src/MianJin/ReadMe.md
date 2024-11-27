@@ -198,10 +198,31 @@ synchronized关键字则用于更广泛的同步，它可以修饰方法、代�
 **3、线程的生命周期**  
 ![ThreadLifeCycle.png](ThreadLifeCycle.png)
 
+**4.什么是AQS**  
+AbstractQueuedSynchronizer，即抽象队列同步器。他是构建锁或者其他同步组件的基础框架。    
 
+| synchronized | AQS |
+| :-----| ----: |
+| java关键字， C++语言实现 | java语言实现 | 
+| 悲观锁，自动释放 | 悲观锁，手动开启和关闭 |
+|锁竞争激烈都是重量级锁| 锁竞争激烈的情况下，提供了多种解决方案|
 
-**4、threadLocal可能造成的问题以及解决方案**
+AQS常见实现类：  
+ReentrantLock、Semaphore、 CountdownLatch  
 
+基本原理：  
+锁状态变量：state（volatile的）  通过cas（底层是Unsafe类直接操作内存）设置state状态保证操作原子性  
+队列：当获取锁冲突时，用于线程排队（有FIFO或其他）
+
+**5、threadLocal可能造成的问题以及解决方案**  
+
+**6.MyBatis一级、二级缓存**
+一级缓存：作用域是session级别， 基于PerpetualCache，本质是一个HashMap。当Session进行flush或close之后，该session中所有的Cache就将清空，
+默认打开一级缓存。  
+二级缓存：作用域是namespace和mapper的作用域，不依赖于SQL session， 默认也是基于PerpetualCache，本质是一个HashMap，需要单独开启。
+
+**6.MyBatis执行流程**  
+![MyBatis执行流程.png](MyBatis执行流程.png)
 
 # Kubernate
 
@@ -241,6 +262,12 @@ SETNX 即 SET if Not eXists (对应 Java 中的 setIfAbsent 方法)，如果 key
 一定要保证设置指定 key 的值和过期时间是一个原子操作！！！ 不然的话，依然可能会出现锁无法被释放的问题。这样确实可以解决问题，不过，这种解决办法同样存在漏洞：
 如果操作共享资源的时间大于过期时间，就会出现锁提前过期的问题，进而导致分布式锁直接失效。如果锁的超时时间设置过长，又会影响到性能。
 
+**2、Redis数据类型**  
+string（字符串）: 基本的数据存储单元，可以存储字符串、整数或者浮点数。
+hash（哈希）:一个键值对集合，可以存储多个字段。
+list（列表）:一个简单的列表，可以存储一系列的字符串元素。
+set（集合）:一个无序集合，可以存储不重复的字符串元素。
+zset(sorted set：有序集合): 类似于集合，但是每个元素都有一个分数（score）与之关联。
 
 # linux
 
@@ -344,11 +371,13 @@ c.同步+异步组合提交
 
 **5.Kafka数据清理机制**  
 
-**5.Kafka高性能的设计**  
+**6.Kafka高性能的设计**  
 1）消息分区：不收单台服务器的限制，可以不受限的处理更多的数据。  
 2）顺序读写： 磁盘顺序读写，提升读写效率。  
 3）页缓存： 把磁盘的数据缓存到内存中，把对磁盘的访问变成对内存的访问。  
 4）零拷贝：减少上下文切换及数据拷贝  
+![非零拷贝消费流程.png](非零拷贝消费流程.png)
+![零拷贝消费流程.png](零拷贝消费流程.png)
 5）消息压缩：减少磁盘IO和网络IO  
 6）分批发送：将消息打包批量发送，减少网络开销  
 
@@ -535,6 +564,54 @@ Spring Boot测试模块，为应用测试提供了许多非常有用的核心功
 只限于本地开发阶段，当打成整包运行时这些功能会被禁用。
 大概的核心模块就是这些，里面更多的细节请阅读后续的更多文章。更多 Spring Boot 文章请在Java技术栈微信公众号后台回复关键字：boot。
 
+
+**2.Spring boot中单例bean是线程安全的吗**  
+不实现成安全的。Spring 框架中有一个@Scope注解，默认的值是sigleton，单例的。  
+因为一般在Spring的bean中都是注入无状态的对象，没有线程安全问题，如果在bean中定义了可以修改的成员变量，是要考虑线程安全问题的，
+可以使用多例或者加锁来解决。  
+
+**2.Spring boot中的AOP原理**  
+AOP称为面向切面编程，用于将那些与业务无关，但却对多个对象产生影响的公共行为和逻辑，抽取并封装为一个可重用模块，这个模块被命名为切面（Aspect），
+减少系统中的重复代码，降低模块间的耦合度，同时提高系统的可维护性。  
+
+使用场景：  
+记录操作日志  
+缓存处理  
+Spring中内置的事务处理  
+
+**2.Spring 的事务是如何实现的**  
+Spring支持编程式事务和声明式事务管理两种方式。  
+编程式事务： 需要使用tracsactionTemplate进行实现，对业务代码有侵入性，项目中很少使用。  
+
+声明式事务： 声明式事务管理建立在AOP之上。其本质是通过AOP功能，对方法前后进行拦截，将事务处理的功能编织到拦截的方法中，
+也就是在目标方法开始之前加入一个事务，在执行完目标方法之后根据执行情况提交或者回滚事务。  
+
+核心是： 使用aop的环绕通知+切点表达式（用于定位要记录的日志的方法），通过环绕通知的参数获取请求方法的参数（类、方法
+注解、请求方式等），获取到这些参数以后，保存到数据库。  
+
+
+**2.Spring 的事务失效的情况**  
+1）异常捕获处理  
+把运行时异常在事务方法中进行了捕获处理。  
+
+2）抛出检查异常  
+Spring事务只会回滚非检查异常，如果要回滚受检异常，需要配置
+@Transactional(rollbackFor=Exception.class)
+
+3）非public方法  
+
+**2.Spring bean的生命周期**  
+1）通过BeanDefination获取bean的定义信息  
+2）调用构造函数实例化bean  
+3）bean的依赖注入  
+4）处理Aware接口（BeanNameAware， BeanFactoryAware，ApplicationContextAware）  
+5）Bean的后置处理器BeanPostProcessor-before  
+6）初始化方法  
+7）Bean的后置处理器BeanPostProcessor-after  
+8）销毁bean  
+![SpringBean的生命周期.png](SpringBean的生命周期.png)
+
+
 ## Spring Cloud
 
 ## Spring面经
@@ -607,6 +684,20 @@ CPU飚高、内存泄露、线程死锁...
 
 5）分库分表  
 ![img.png](数据库设计优化经验table和sql优化.png)
+
+**6.JVM CPU飚高的排查思路**  
+1）使用top命令查看占用cpu的情况  
+2）通过top命令查看以后，可以知道是哪个进程tid占用cpu高  
+3）查看进程的线程信息：ps H -eo pid,tid,%cpu | grep tid , 通过分析找到cpu高的线程  
+4) 可以根据线程id找到对应的线程，进一步定位到源代码的行号，（jstack打印进程的所有线程栈，然后将查到的线程id
+   转化成16进制找到对应的线程）  
+
+**7.java 内存泄露的排查思路**  
+1）获取堆内存快照dump  
+2）VisualVm分析dump文件  
+3）查看堆的信息，定位内存溢出问题  
+
+
 
 [拒绝策略]:https://developer.aliyun.com/article/1382341?spm=a2c6h.14164896.0.0.3e4947c5jIzSlb&scm=20140722.S_community@@%E6%96%87%E7%AB%A0@@1382341._.ID_1382341-RL_%E7%BA%BF%E7%A8%8B%E6%B1%A0%E6%8B%92%E7%BB%9D%E7%AD%96%E7%95%A5-LOC_search~UND~community~UND~item-OR_ser-V_3-P0_2
 [循环依赖]:https://developer.aliyun.com/article/1436029?spm=a2c6h.14164896.0.0.5f8447c5ADJHwB&scm=20140722.S_community@@%E6%96%87%E7%AB%A0@@1436029._.ID_1436029-RL_Spring%20%E4%B8%89%E7%BA%A7%E7%BC%93%E5%AD%98%E5%8E%9F%E7%90%86-LOC_search~UND~community~UND~item-OR_ser-V_3-P0_4
