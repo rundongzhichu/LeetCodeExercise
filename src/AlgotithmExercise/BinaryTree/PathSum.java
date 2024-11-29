@@ -1,31 +1,22 @@
-package AlgotithmExercise;
+package AlgotithmExercise.BinaryTree;
 
+public class PathSum {
 
-import AlgotithmExercise.BinaryTree.TreeNode;
-import AlgotithmExercise.DoublePointer.ListNode;
-
-import java.math.BigDecimal;
-import java.util.*;
-import java.util.concurrent.Semaphore;
-import java.util.stream.Stream;
-
-public class Main {
-
-    private Semaphore aSem = new Semaphore(1);
-    private Semaphore bSem = new Semaphore(0);
-    private Semaphore cSem = new Semaphore(0);
-
-    public static void main(String[] args) {
-        new Main().test();
-    }
-
-    public void test() {
-
-    }
-
-    private int count = 0;
-
+    /**
+     *
+     * 链接：https://leetcode.cn/problems/path-sum-iii/solutions/1021296/lu-jing-zong-he-iii-by-leetcode-solution-z9td/
+     * 核心思路：这道题我没做出来，采用深度优先遍历去做
+     *
+     */
     class Solution {
+
+        /**
+         * 这里可以枚举路径的根节点
+         *
+         * @param root
+         * @param targetSum
+         * @return
+         */
         public int pathSum(TreeNode root, long targetSum) {
             if (root == null) {
                 return 0;
@@ -37,6 +28,12 @@ public class Main {
             return ret;
         }
 
+        /**
+         * 这个函数表示从当前根节点往下找和胃targetSum的路径，路径包括当前根节点
+         * @param root
+         * @param targetSum
+         * @return
+         */
         public int rootSum(TreeNode root, long targetSum) {
             int ret = 0;
 
@@ -55,5 +52,3 @@ public class Main {
     }
 
 }
-
-
