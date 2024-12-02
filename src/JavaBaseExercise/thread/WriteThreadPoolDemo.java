@@ -1,4 +1,4 @@
-package JavaBaseExercise;
+package JavaBaseExercise.thread;
 
 import java.util.concurrent.*;
 
