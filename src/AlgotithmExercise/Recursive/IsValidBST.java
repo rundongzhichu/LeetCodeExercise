@@ -68,7 +68,13 @@ public class IsValidBST {
     }
 
     /**
-     * 递归加上下界的思路
+     *
+     * 链接：https://leetcode.cn/problems/validate-binary-search-tree/solutions/230256/yan-zheng-er-cha-sou-suo-shu-by-leetcode-solution/
+     *
+     * 核心思路： 这启示我们设计一个递归函数 helper(root, lower, upper) 来递归判断，函数表示考虑以 root 为根的子树，
+     * 判断子树中所有节点的值是否都在 (l,r) 的范围内（注意是开区间）。如果 root 节点的值 val 不在 (l,r) 的范围内说明不满足条件直接返回，
+     * 否则我们要继续递归调用检查它的左右子树是否满足，如果都满足才说明这是一棵二叉搜索树。
+     *
      */
     class Solution1 {
         public boolean isValidBST(TreeNode root) {
@@ -86,5 +92,33 @@ public class IsValidBST {
         }
     }
 
+
+    /**
+     *
+     *  链接：https://leetcode.cn/problems/validate-binary-search-tree/solutions/230256/yan-zheng-er-cha-sou-suo-shu-by-leetcode-solution/
+     *  核心思路：利用二叉搜索树的中序遍历是有序的特性
+     *
+     */
+    class Solution2 {
+        public boolean isValidBST(TreeNode root) {
+            Deque<TreeNode> stack = new LinkedList<TreeNode>();
+            double inorder = -Double.MAX_VALUE;
+
+            while (!stack.isEmpty() || root != null) {
+                while (root != null) {
+                    stack.push(root);
+                    root = root.left;
+                }
+                root = stack.pop();
+                // 如果中序遍历得到的节点的值小于等于前一个 inorder，说明不是二叉搜索树
+                if (root.val <= inorder) {
+                    return false;
+                }
+                inorder = root.val;
+                root = root.right;
+            }
+            return true;
+        }
+    }
 
 }

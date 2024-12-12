@@ -1,7 +1,9 @@
 package AlgotithmExercise;
 
 
-import java.util.PriorityQueue;
+import AlgotithmExercise.BinaryTree.TreeNode;
+
+import java.util.*;
 import java.util.concurrent.Semaphore;
 
 public class Main {
@@ -18,7 +20,6 @@ public class Main {
         System.out.println("aSem = " + aSem);
 
     }
-
 
 
 
