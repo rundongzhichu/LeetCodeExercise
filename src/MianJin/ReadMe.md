@@ -179,7 +179,7 @@ Java 虚拟线程也可以用于并行计算，例如多线程计算中的 MapRe
 3.GUI 事件监听
 在 GUI 应用程序中，虚拟线程可以用于监听用户事件，如鼠标点击、键盘输入等。在这种应用场景下，虚拟线程通常不需要很高的计算性能，但需要能够及时响应用户的操作。虚拟线程因为轻量级，因此能够快速地相应用户的操作，并将处理结果返回给 GUI 应用程序。
 
-**虚拟线程的优化**  
+**虚拟线程的优化**    
 在虚拟线程应用的过程中，还需要关注线程的安全和优化问题，常见优化方式有以下几种：
 1 线程池
 线程池可以用来缓存线程资源，避免了线程的频繁创建和销毁，以及系统资源的浪费。在使用线程池时，需要保证线程的数量不会超出资源的限制，
@@ -265,6 +265,12 @@ ReentrantLock、Semaphore、 CountdownLatch
 ‌软引用‌：适用于缓存机制，如缓存数据或图片等。在内存不足时可以释放这些对象‌2。  
 ‌弱引用‌：适用于实现一些特定的功能，如观察者模式，通常用于监视器对象的状态‌2。  
 ‌虚引用‌：适用于对象池和线程池等高级对象生命周期管理，在对象被回收时触发特定的清理操作‌2。  
+
+**7.Java 类加载过程，以及字段初始化所在的阶段**  
+静态字段在类的准备阶段会初始化一个零值，如果是final修饰的静态字段，那么会在准备阶段初始化为代码赋予的初值；  
+其余的静态字段（非final修饰的）会在初始化阶段完成初始化赋值（将代码里面赋予的值初始化给静态变量，或者执行静态代码块进行初始化）  
+
+
 
 
 # Kubernate
@@ -770,7 +776,7 @@ Spring Boot测试模块，为应用测试提供了许多非常有用的核心功
 因为一般在Spring的bean中都是注入无状态的对象，没有线程安全问题，如果在bean中定义了可以修改的成员变量，是要考虑线程安全问题的，
 可以使用多例或者加锁来解决。  
 
-**2.Spring boot中的AOP原理**  
+**3.Spring boot中的AOP原理**  
 AOP称为面向切面编程，用于将那些与业务无关，但却对多个对象产生影响的公共行为和逻辑，抽取并封装为一个可重用模块，这个模块被命名为切面（Aspect），
 减少系统中的重复代码，降低模块间的耦合度，同时提高系统的可维护性。  
 
@@ -779,7 +785,7 @@ AOP称为面向切面编程，用于将那些与业务无关，但却对多个�
 缓存处理  
 Spring中内置的事务处理  
 
-**2.Spring 的事务是如何实现的**  
+**4.Spring 的事务是如何实现的**  
 Spring支持编程式事务和声明式事务管理两种方式。  
 编程式事务： 需要使用tracsactionTemplate进行实现，对业务代码有侵入性，项目中很少使用。  
 
@@ -790,7 +796,7 @@ Spring支持编程式事务和声明式事务管理两种方式。
 注解、请求方式等），获取到这些参数以后，保存到数据库。  
 
 
-**2.Spring 的事务失效的情况**  
+**5.Spring 的事务失效的情况**  
 1）异常捕获处理  
 把运行时异常在事务方法中进行了捕获处理。  
 
@@ -800,7 +806,7 @@ Spring事务只会回滚非检查异常，如果要回滚受检异常，需要�
 
 3）非public方法  
 
-**2.Spring bean的生命周期**  
+**6.Spring bean的生命周期**  
 1）通过BeanDefination获取bean的定义信息  
 2）调用构造函数实例化bean  
 3）bean的依赖注入  
@@ -811,6 +817,52 @@ Spring事务只会回滚非检查异常，如果要回滚受检异常，需要�
 8）销毁bean  
 ![SpringBean的生命周期.png](SpringBean的生命周期.png)
 
+**7.BeanFactoryPostProcessor 和 BeanPostProcessor 用途**   
+1）BeanPostProcessor接口：  
+BeanPostProcessor接口允许你在一个bean实例创建并装配其依赖之后，但在其被实际使用之前，修改这个bean的属性。
+你可以实现这个接口，并定义自己的逻辑来修改bean的状态。  
+例如，你可以实现一个BeanPostProcessor，在每个bean初始化之后记录一条日志。
+```java
+public class LoggingBeanPostProcessor implements BeanPostProcessor {
+
+    @Override
+    public Object postProcessBeforeInitialization(Object bean, String beanName) {
+        // 在这里可以添加自定义逻辑，在bean初始化之前执行
+        return bean;
+    }
+ 
+    @Override
+    public Object postProcessAfterInitialization(Object bean, String beanName) {
+        // 在这里可以添加自定义逻辑，在bean初始化之后执行
+        System.out.println("Bean '" + beanName + "' initialized.");
+        return bean;
+    }
+}
+```
+
+2）BeanFactoryPostProcessor接口：  
+BeanFactoryPostProcessor接口允许你修改配置元数据（配置元数据是指Spring容器中bean的定义），
+但是在实例化任何bean之前。这使得你可以在bean实例化之前对bean的定义进行修改。  
+例如，你可以实现一个BeanFactoryPostProcessor，修改所有bean的作用域。
+```java
+public class CustomBeanFactoryPostProcessor implements BeanFactoryPostProcessor {
+ 
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) {
+        // 遍历所有的bean定义
+        BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+        String[] beanDefinitionNames = registry.getBeanDefinitionNames();
+        for (String beanName : beanDefinitionNames) {
+            BeanDefinition beanDef = registry.getBeanDefinition(beanName);
+            beanDef.setScope("prototype"); // 修改作用域为原型模式
+        }
+    }
+}
+```
+BeanPostProcessor和BeanFactoryPostProcessor的主要区别在于它们修改bean定义的时机不同：  
+BeanPostProcessor是在bean实例化后修改， 而BeanFactoryPostProcessor是在所有bean实例化前修改。
+
+注意：BeanFactoryPostProcessor的postProcessBeanFactory方法的调用时机在BeanPostProcessor的postProcessBeforeInitialization方法之前。
 
 ## Spring Cloud
 
