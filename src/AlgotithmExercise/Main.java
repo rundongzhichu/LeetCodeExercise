@@ -17,8 +17,9 @@ public class Main {
     }
 
     public void test() {
-        System.out.println("aSem = " + aSem);
-
+        int i =12;
+        i*=++i;
+        System.out.println("i*=++i = " + i);
     }
 
 
