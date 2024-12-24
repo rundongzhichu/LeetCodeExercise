@@ -271,7 +271,59 @@ ReentrantLock、Semaphore、 CountdownLatch
 其余的静态字段（非final修饰的）会在初始化阶段完成初始化赋值（将代码里面赋予的值初始化给静态变量，或者执行静态代码块进行初始化）  
 
 
+**8.String、StringBuilder和StringBuffer的区别**  
 
+
+**9.++j j++ j=j++的执行效果**  
+```java
+j=0;
+j=j++; // 执行完这一行，j还是等于0
+```
+
+
+**10.Integer的缓存能够存储的数据范围**  
+Integer 缓存是 Java 5 中引入的一个有助于节省内存、提高性能的特性。
+Integer中有个静态内部类IntegerCache，里面有个cache[],也就是Integer常量池，常量池的大小为一个字节（-128~127）。
+JDK源码如下（摘自JDK1.8源码）：
+```java
+    /**
+    * Cache to support the object identity semantics of autoboxing for values between
+    * -128 and 127 (inclusive) as required by JLS.
+    *
+    * The cache is initialized on first usage.  The size of the cache
+    * may be controlled by the -XX:AutoBoxCacheMax=<size> option.
+    * During VM initialization, java.lang.Integer.IntegerCache.high property
+    * may be set and saved in the private system properties in the
+    * sun.misc.VM class.
+    */
+    private static class IntegerCache {
+        static final int low = -128;
+        static final int high;
+        static final Integer cache[];
+     
+        static {
+            // high value may be configured by property
+            int h = 127;
+            String integerCacheHighPropValue =
+                sun.misc.VM.getSavedProperty("java.lang.Integer.IntegerCache.high");
+            if (integerCacheHighPropValue != null) {
+                int i = parseInt(integerCacheHighPropValue);
+                i = Math.max(i, 127);
+                // Maximum array size is Integer.MAX_VALUE
+                h = Math.min(i, Integer.MAX_VALUE - (-low));
+            }
+            high = h;
+     
+            cache = new Integer[(high - low) + 1];
+            int j = low;
+            for(int k = 0; k < cache.length; k++)
+                cache[k] = new Integer(j++);
+        }
+     
+        private IntegerCache() {}
+    }
+
+```
 
 # Kubernate
 
@@ -561,6 +613,32 @@ https://zhuanlan.zhihu.com/p/554481474
 **10.MetaQ实际上是在RockMQ上封装了一些东西**
 
 **11.RocketMQ 消费者消费重试机制**  
+
+
+**12.Kafka 和RocketMQ的存储机制**  
+Kafka 存储机制：
+>Kafka部分名词解释如下：
+> Broker：消息中间件处理结点，一个Kafka节点就是一个broker，多个broker可以组成一个Kafka集群。  
+> Topic：一类消息   
+> Partition：topic物理上的分组，一个topic可以分为多个partition，每个partition是一个有序的队列。  
+> Segment：partition物理上由多个segment组成  
+> offset：每个partition都由一系列有序的、不可变的消息组成，这些消息被连续的追加到partition中。partition中的每个消息都有一个连续的序列号叫做offset,用于partition唯一标识一条消息.    
+
+Kafka以partition为单元分片存储消息.
+分为三个文件
+索引文件.index: 存储kafka消息偏移量索引  
+日志文件.log：存储具体的kafka消息  
+时间戳索引文件.timeindex：存储每个消息对应的时间戳，时间戳只能递增  
+读写磁盘：sendFile机制
+
+RocketMQ的存储机制：   
+rocketMQ把所有topic中的消息都commitLog中  
+存储的文件主要分为:  
+commitlog: 存储消息实体  
+consumequeue: 按Topic和队列存储消息的offset  
+index: index按key、tag、时间等存储  
+读写磁盘：mMap机制  
+
 
 
 # Mysql
