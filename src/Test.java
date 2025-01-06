@@ -1,4 +1,5 @@
 import java.util.*;
+import java.util.concurrent.Executors;
 
 public class Test {
 
@@ -10,6 +11,7 @@ public class Test {
     }
 
     public int closestSum(int[] nums, int target) {
+        Executors.newCachedThreadPool();
         Arrays.sort(nums);
 
         int start=0, end = nums.length-1;
