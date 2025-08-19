@@ -1,7 +1,7 @@
-package org.example;
+package com.micrometer.demo;
 
-import org.example.gen.LabelExprBaseVisitor;
-import org.example.gen.LabelExprParser;
+import com.micrometer.demo.gen.LabelExprParser;
+import com.micrometer.demo.gen.LabelExprBaseVisitor;
 
 import java.util.HashMap;
 import java.util.Map;

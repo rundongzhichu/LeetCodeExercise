@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: MicroMeterDemo
+  jpa:
+    hibernate:
+      ddl-auto: none
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, prometheus
+  metrics:
+    tags:
+      application: ${spring.application.name}
+    distribution:
+      percentiles-histogram:
+        http.server.requests: true # ??HTTP?????
+  prometheus:
+    metrics:
+      export:
+        enabled: true

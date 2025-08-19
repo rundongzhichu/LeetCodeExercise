@@ -1,7 +1,7 @@
-package org.example;
+package com.micrometer.demo;
 
-import org.example.gen.LabelExprBaseListener;
-import org.example.gen.LabelExprParser;
+import com.micrometer.demo.gen.LabelExprParser;
+import com.micrometer.demo.gen.LabelExprBaseListener;
 
 import java.util.Map;
 import java.util.Stack;

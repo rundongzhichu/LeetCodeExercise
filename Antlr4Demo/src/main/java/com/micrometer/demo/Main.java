@@ -1,11 +1,11 @@
-package org.example;
+package com.micrometer.demo;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
-import org.example.gen.LabelExprLexer;
-import org.example.gen.LabelExprParser;
+import com.micrometer.demo.gen.LabelExprLexer;
+import com.micrometer.demo.gen.LabelExprParser;
 
 import java.io.IOException;
 import java.io.InputStream;

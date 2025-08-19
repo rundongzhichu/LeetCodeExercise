@@ -4,11 +4,14 @@ import java.util.concurrent.Executors;
 public class Test {
 
     public static void main(String[] args) {
-        Integer v1 = new Integer(2);
-        Integer v2 = new Integer(2);
+        Integer v1 = 2;
+        Integer v2 = 2;
         System.out.println(v1.equals(v2));
 
     }
+
+
+
 
     public int closestSum(int[] nums, int target) {
         Executors.newCachedThreadPool();
